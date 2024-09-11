@@ -7,8 +7,80 @@
 generator client {
   provider = "prisma-client-js"
 }
-
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+// 유저 계정 테이블
+model UserAccount {
+  userId      String @id @map("userId")
+  userPw      String @map("userPw")
+  userName    String @unique @map("userName")
+  userPwCheck String @map("userPwCheck")
+
+  // 유저 계정 테이블과 캐릭터 테이블은 1:N 관계
+  characters   Characters[]
+
+  @@map("UserAccount")
+}
+
+// 캐릭터 테이블
+model Characters {
+  userId          String  @map("userId")    // 외래키
+  characterId     Int     @id @map("characterId")
+  characterName   String  @unique @map("characterName")
+  characterHp     Int     @map("characterHp")
+  characterPower  Int     @map("characterPower")
+  characterGold   Int?    @default(10000) @map("characterGold")
+
+  // UserAccount 테이블과 관계 설정
+  userAccount UserAccount               @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  // 캐릭터 테이블과 인벤토리 테이블과 관계는 1:1 관계
+  CharacterInventory CharacterInventory?
+  CharacterItemMount CharacterItemMount?
+
+  @@map("Characters")
+}
+
+// 아이템 테이블
+model Items {
+  item_code   Int    @id @default(autoincrement()) @map("item_code")
+  item_name   String @map("item_name")
+  item_stat   Json   @map("item_stat")
+  item_price  Int    @map("item_price")
+
+  // 아이템 테이블과 인벤토리 테이블은 N:M 관계
+  CharacterInventory CharacterInventory[]
+
+  @@map("Items")
+}
+
+// 캐릭터 인벤토리 테이블
+model CharacterInventory {
+  inventoryId     Int     @id @default(autoincrement()) @map("inventoryId")
+  characterId     Int     @unique @map("characterId")   // 외래키
+  item_code       Int     @map("item_code")     // 외래키
+  item_count      Int     @map("item_count")
+
+  characters Characters   @relation(fields: [characterId], references: [characterId], onDelete: Cascade)
+  items Items             @relation(fields: [item_code], references: [item_code], onDelete: Cascade)
+
+  CharacterItemMount CharacterItemMount?
+
+  // 한 캐릭터가 동일한 아이템을 중복으로 가질 수 없도록...
+  @@unique([characterId, item_code])
+  @@map("CharacterInventory")
+}
+
+// 캐릭터 아이템 장착 테이블
+model CharacterItemMount {
+  mountId         Int     @id @default(autoincrement()) @map("mountId")
+  characterId     Int     @unique @map("characterId")   // 외래키
+  inventoryId     Int     @unique @map("inventoryId")   // 외래키
+  item_code       Int
+
+  characters Characters   @relation(fields: [characterId], references: [characterId], onDelete: Cascade)
+  characterInventory CharacterInventory   @relation(fields: [inventoryId], references: [inventoryId])
 }

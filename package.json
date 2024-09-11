@@ -4,7 +4,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "format": "prettier --write *.js **/*.js"
+    "format": "prettier --write *.js **/*.js",
+    "dev": "nodemon app.js"
   },
   "repository": "https://github.com/jini031104/Item_Simulator.git",
   "author": "jini031104 <90189794+jini031104@users.noreply.github.com>",
