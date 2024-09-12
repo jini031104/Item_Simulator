@@ -52,6 +52,7 @@ model Items {
   item_price  Int    @map("item_price")
 
   // 아이템 테이블과 인벤토리 테이블은 N:M 관계
+  // 왜냐하면 다수의 캐릭터는 다수의 아이템을 가질 수 있으므로...
   CharacterInventory CharacterInventory[]
 
   @@map("Items")
